@@ -1,4 +1,4 @@
-﻿namespace webstore.Security.Models
+﻿namespace Store.Security.Models
 {
     /// <summary>
     /// Represents a hashed password.

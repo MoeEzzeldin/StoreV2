@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Store.Models;
 
@@ -9,11 +10,12 @@ public partial class ApplicationDbContext : DbContext
 {
     public ApplicationDbContext()
     {
+        // import connecttion string from appsettings.json or environment variable
     }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        : base(options)
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
+
     }
 
     public virtual DbSet<Product> Products { get; set; }

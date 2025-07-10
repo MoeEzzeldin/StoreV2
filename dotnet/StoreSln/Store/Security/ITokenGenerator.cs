@@ -1,4 +1,4 @@
-﻿namespace webstore.Security
+﻿namespace Store.Security
 {
     public interface ITokenGenerator
     {

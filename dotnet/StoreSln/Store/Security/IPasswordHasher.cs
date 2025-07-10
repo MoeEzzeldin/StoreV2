@@ -1,6 +1,6 @@
-﻿using webstore.Security.Models;
+﻿using Store.Security.Models;
 
-namespace webstore.Security
+namespace Store.Security
 {
     /// <summary>
     /// Represents a password hasher.

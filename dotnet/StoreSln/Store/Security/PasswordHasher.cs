@@ -1,9 +1,9 @@
-﻿using webstore.Security.Models;
+﻿using Store.Security.Models;
 using System;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace webstore.Security
+namespace Store.Security
 {
     /// <summary>
     /// The hash provider provides functionality to hash a plain text password and validate
