@@ -9,7 +9,7 @@ using Store.Models;
 namespace Store.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class StatusController : ControllerBase
     {
         private readonly ILogger<StatusController> _logger;
@@ -56,8 +56,8 @@ namespace Store.Controllers
                 // Endpoints information
                 Endpoints = new List<string>
                 {
-                    "/api/status",
-                    "/api/products"
+                    "/status",
+                    "/products"
                 }
             };
             

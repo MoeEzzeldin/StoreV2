@@ -1,32 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Store.Data;
 using Store.Models;
 using System;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using webstore.Security;
+using Store.Security;
+using Store.Reposatories.I_Repos;
 
 namespace Store.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        private readonly ApplicationDbContext _context;
-        private readonly IPasswordHasher _passwordHasher;
+        private readonly I_UserRepo _userRepo;
         private readonly ITokenGenerator _tokenGenerator;
 
         public AuthController(
             ILogger<AuthController> logger,
-            ApplicationDbContext context,
-            IPasswordHasher passwordHasher,
+            I_UserRepo userRepo,
             ITokenGenerator tokenGenerator)
         {
             _logger = logger;
-            _context = context;
-            _passwordHasher = passwordHasher;
+            _userRepo = userRepo;
             _tokenGenerator = tokenGenerator;
         }
 
@@ -46,40 +42,26 @@ namespace Store.Controllers
                     return BadRequest(new { message = "Passwords do not match" });
                 }
 
-                // Check if username is already taken
-                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
-                if (existingUser != null)
+                // Check if username already exists
+                if (await _userRepo.UsernameExistsAsync(model.Username))
                 {
                     return BadRequest(new { message = "Username is already taken" });
                 }
 
-                // Hash the password
-                var hashedPassword = _passwordHasher.ComputeHash(model.Password);
+                // Register the user using the repository
+                var user = await _userRepo.RegisterUserAsync(model);
 
-                // Create new user
-                var user = new User
+                if (user == null)
                 {
-                    Username = model.Username,
-                    PasswordHash = hashedPassword.Password,
-                    Salt = hashedPassword.Salt,
-                    UserRole = string.IsNullOrEmpty(model.Role) ? "User" : model.Role
-                };
-
-                // Save to database
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
+                    return BadRequest(new { message = "Registration failed" });
+                }
 
                 _logger.LogInformation("User registered successfully: {Username}", model.Username);
 
                 // Return success without sensitive data
                 return Ok(new { 
                     message = "Registration successful", 
-                    user = new ReturnUser 
-                    { 
-                        UserId = user.UserId, 
-                        Username = user.Username, 
-                        Role = user.UserRole 
-                    } 
+                    user = user
                 });
             }
             catch (Exception ex)
@@ -100,36 +82,21 @@ namespace Store.Controllers
                     return BadRequest(new { message = "Username and password are required" });
                 }
 
-                // Find user
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == model.Username);
+                // Authenticate the user using the repository
+                var user = await _userRepo.AuthenticateUserAsync(model);
+
                 if (user == null)
                 {
                     return Unauthorized(new { message = "Invalid username or password" });
                 }
 
-                // Verify password
-                bool isPasswordValid = _passwordHasher.VerifyHashMatch(
-                    user.PasswordHash,
-                    model.Password,
-                    user.Salt);
-
-                if (!isPasswordValid)
-                {
-                    return Unauthorized(new { message = "Invalid username or password" });
-                }
-
                 // Generate JWT token
-                string token = _tokenGenerator.GenerateToken(user.UserId, user.Username, user.UserRole);
+                string token = _tokenGenerator.GenerateToken(user.UserId, user.Username, user.Role);
 
                 // Return successful login response with token
                 var response = new LoginResponse
                 {
-                    User = new ReturnUser
-                    {
-                        UserId = user.UserId,
-                        Username = user.Username,
-                        Role = user.UserRole
-                    },
+                    User = user,
                     Token = token
                 };
 

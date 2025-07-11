@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
+using System;
 using System.IO;
 
 namespace Store
@@ -8,8 +10,28 @@ namespace Store
     {
         public static void Main(string[] args)
         {
-            // Create and run the host
-            CreateHostBuilder(args).Build().Run();
+            try
+            {
+                Log.Information("Starting web host");
+                
+                // Create and run the host
+                CreateHostBuilder(args).Build().Run();
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Host terminated unexpectedly");
+                
+                // Additional logging to console for immediate visibility during debugging
+                Console.WriteLine("FATAL ERROR: " + ex.Message);
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine("INNER EXCEPTION: " + ex.InnerException.Message);
+                }
+            }
+            finally
+            {
+                Log.CloseAndFlush();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>

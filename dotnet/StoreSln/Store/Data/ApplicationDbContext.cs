@@ -2,31 +2,42 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Store.Models;
+using Store.Data.DbSets;
 
 namespace Store.Data;
 
 public partial class ApplicationDbContext : DbContext
 {
-    public ApplicationDbContext()
-    {
-        // import connecttion string from appsettings.json or environment variable
-    }
-
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-    {
-
-    }
-
+    private ProductDbSet _productDbSet;
+    private ReviewDbSet _reviewDbSet;
+    private UserDbSet _userDbSet;
+    
+    public ProductDbSet ProductSet => _productDbSet ??= new ProductDbSet(this);
+    public ReviewDbSet ReviewSet => _reviewDbSet ??= new ReviewDbSet(this);
+    public UserDbSet UserSet => _userDbSet ??= new UserDbSet(this);
+    
+    // Original DbSet properties needed for EF Core infrastructure
     public virtual DbSet<Product> Products { get; set; }
-
     public virtual DbSet<Review> Reviews { get; set; }
-
     public virtual DbSet<User> Users { get; set; }
 
+    // Constructor that will be used by the DI system - highest priority
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+        : base(options)
+    {
+    }
+
+    // For design-time tools and migrations
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=localhost;Database=store;Trusted_Connection=True;TrustServerCertificate=True;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            // Nothing to do here, this is only for design-time tools
+            // when no options have been configured
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
