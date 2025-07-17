@@ -17,11 +17,11 @@ namespace Store
     public class Startup
     {
         public IConfiguration Configuration { get; }
-        
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-            
+
             // Configure Serilog to log to file and console
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
@@ -30,6 +30,15 @@ namespace Store
                 .WriteTo.Console()
                 .WriteTo.File("logs/store-.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
+            try
+            {
+                Log.Information("Starting application");
+            }
+            catch (Exception ex)
+            {
+                Log.Fatal(ex, "Application startup failed");
+                throw; // Re-throw to ensure the application does not start if logging fails
+            }
         }
         
         // This method gets called by the runtime. Use this method to add services to the container.
