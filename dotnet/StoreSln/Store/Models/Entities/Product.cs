@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Store.Models;
+namespace Store.Models.Entities;
 
 public partial class Product
 {

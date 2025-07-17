@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Store.Data;
-using Store.Models;
+using Store.Models.Entities;
 using Store.Reposatories.I_Repos;
 using Store.Security;
 using Store.Security.Models;

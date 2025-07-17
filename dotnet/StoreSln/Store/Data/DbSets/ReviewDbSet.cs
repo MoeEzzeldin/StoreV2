@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Store.Models;
+using Store.Models.Entities;
 
 namespace Store.Data.DbSets
 {

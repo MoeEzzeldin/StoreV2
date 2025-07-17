@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Dapper;
 using Store.Data;
-using Store.Models;
 using Store.Reposatories.I_Repos;
 using Store.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Store.Models.Entities;
 
 namespace Store.Reposatories.Repos
 {

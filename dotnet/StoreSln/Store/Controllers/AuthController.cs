@@ -1,13 +1,13 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Store.Models;
+using Store.Models.Entities;
 using Store.Reposatories.I_Repos;
 using Store.Security;
-using System;
 using System.Net;
 using System.Threading.Tasks;
-
+using Store.Models.DTOs;
+using AutoMapper;
 namespace Store.Controllers
 {
     /// <summary>
@@ -20,6 +20,7 @@ namespace Store.Controllers
         private readonly ILogger<AuthController> _logger;
         private readonly I_UserRepo _userRepo;
         private readonly ITokenGenerator _tokenGenerator;
+        private readonly IMapper _mapper;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class
@@ -30,12 +31,14 @@ namespace Store.Controllers
         public AuthController(
             ILogger<AuthController> logger,
             I_UserRepo userRepo,
-            ITokenGenerator tokenGenerator)
+            ITokenGenerator tokenGenerator,
+            IMapper mapper)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
-            _tokenGenerator = tokenGenerator ?? throw new ArgumentNullException(nameof(tokenGenerator));
-            
+            _logger = logger;
+            _userRepo = userRepo;
+            _tokenGenerator = tokenGenerator;
+            _mapper = mapper;
+
             _logger.LogDebug("AuthController initialized");
         }
 
@@ -74,7 +77,7 @@ namespace Store.Controllers
 
                 // Authenticate user
                 _logger.LogDebug("Attempting to authenticate user: {Username}", model.Username);
-                var user = await _userRepo.AuthenticateUserAsync(model);
+                ReturnUser user = await _userRepo.AuthenticateUserAsync(model);
 
                 if (user == null)
                 {
@@ -87,7 +90,7 @@ namespace Store.Controllers
                 string token = _tokenGenerator.GenerateToken(user.UserId, user.Username, user.Role);
 
                 // Create and return response
-                var response = new LoginResponse
+                LoginResponse response = new LoginResponse
                 {
                     User = user,
                     Token = token

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Store.Models;
 using Store.Data.DbSets;
+using Store.Models.Entities;
 
 namespace Store.Data;
 

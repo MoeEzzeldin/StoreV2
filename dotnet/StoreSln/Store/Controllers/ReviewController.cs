@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Store.Models;
+using Store.Models.Entities;
 using Store.Reposatories.I_Repos;
 using System.Collections.Generic;
 using System.Security.Claims;

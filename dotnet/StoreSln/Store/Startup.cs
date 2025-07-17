@@ -1,15 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Events;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Store.Data;
 using Store.Models;
-using Store.Security;
 using Store.Reposatories.I_Repos;
 using Store.Reposatories.Repos;
+using Store.Security;
 using Store.Utils;
+using System.Reflection;
+using System.Text;
 
 
 namespace Store
@@ -46,7 +47,6 @@ namespace Store
         {
             // Add controllers and Razor Pages
             services.AddControllers();
-            services.AddRazorPages();
 
             // Configure CORS
             services.AddCors(options =>
@@ -78,7 +78,9 @@ namespace Store
             
             // Register DapperContext
             services.AddScoped<IDapperContext, DapperContext>();
-                
+
+            // add AutoMapper
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
             // Register repository services
             services.AddScoped<I_ProductRepo, ProductRepo>();
             services.AddScoped<I_UserRepo, UserRepo>();
@@ -145,6 +147,7 @@ namespace Store
             
             app.UseCors();
             
+
             // Add authentication middleware
             app.UseAuthentication();
             app.UseAuthorization();
@@ -152,7 +155,6 @@ namespace Store
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapRazorPages(); // For Razor Pages support
             });
             
             // Log server start
