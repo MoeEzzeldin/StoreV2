@@ -35,6 +35,14 @@ namespace Store.Controllers
             return Ok(products);
         }
 
+        [HttpGet("/products/cards")]
+        public async Task<ActionResult<Dictionary<string, IEnumerable<Product>>>> GetProductsByPriceRange()
+        {
+            _logger.LogInformation("Getting products by price ranges");
+            var productsByPriceRange = await _productRepo.GetProductsByPriceRangeAsync();
+            return Ok(productsByPriceRange);
+        }
+
         // GET: api/Product/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
@@ -59,6 +67,8 @@ namespace Store.Controllers
             var products = await _productRepo.GetProductsByTypeAsync(type);
             return Ok(products);
         }
+
+        
 
         // GET: api/Product/brand/apple
         [HttpGet("brand/{brand}")]

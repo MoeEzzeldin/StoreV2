@@ -12,7 +12,8 @@ namespace Store.Reposatories.I_Repos
         IQueryable<Product> GetProductsByType(string type);
         IQueryable<Product> GetProductsByBrand(string brand);
         IQueryable<Product> SearchProducts(string searchTerm);
-        
+
+
         // Asynchronous operations
         Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<Product> GetProductByIdAsync(int id);
@@ -29,5 +30,7 @@ namespace Store.Reposatories.I_Repos
         Task<decimal> GetMaxPriceAsync();
         Task<IEnumerable<string>> GetAllBrandsAsync();
         Task<IEnumerable<string>> GetAllTypesAsync();
+        Task<Dictionary<string, IEnumerable<Product>>> GetProductsByPriceRangeAsync();
+
     }
 }

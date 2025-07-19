@@ -178,6 +178,27 @@ namespace Store.Reposatories.Repos
             return await connection.QueryAsync<string>("SELECT DISTINCT type FROM product ORDER BY type");
         }
 
+        public async Task<Dictionary<string, IEnumerable<Product>>> GetProductsByPriceRangeAsync()
+        {
+            var result = new Dictionary<string, IEnumerable<Product>>();
+
+            // Filter products under $200
+            result["under-200"] = await _context.Products
+                .Where(p => p.Price < 200)
+                .ToListAsync();
+
+            // Filter products under $500 (but over $200)
+            result["under-500"] = await _context.Products
+                .Where(p => p.Price >= 200 && p.Price < 500)
+                .ToListAsync();
+
+            // Filter products over $500
+            result["over-500"] = await _context.Products
+                .Where(p => p.Price >= 500)
+                .ToListAsync();
+
+            return result;
+        }
         #endregion
     }
 }
