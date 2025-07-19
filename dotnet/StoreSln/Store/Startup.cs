@@ -11,6 +11,8 @@ using Store.Security;
 using Store.Utils;
 using System.Reflection;
 using System.Text;
+using Store.Services.I_AppService;
+using Store.Services.AppService;
 
 
 namespace Store
@@ -81,11 +83,15 @@ namespace Store
 
             // add AutoMapper
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
             // Register repository services
             services.AddScoped<I_ProductRepo, ProductRepo>();
             services.AddScoped<I_UserRepo, UserRepo>();
             services.AddScoped<I_ReviewRepo, ReviewRepo>();
-                
+
+            // Register application services
+            services.AddScoped<I_ProductService, ProductService>();
+
             // Configure JWT Authentication
             var jwtSecret = Configuration["JwtSecret"];
             if (string.IsNullOrEmpty(jwtSecret))

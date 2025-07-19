@@ -24,10 +24,7 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     // Constructor that will be used by the DI system - highest priority
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
-        : base(options)
-    {
-    }
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){}
 
     // For design-time tools and migrations
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

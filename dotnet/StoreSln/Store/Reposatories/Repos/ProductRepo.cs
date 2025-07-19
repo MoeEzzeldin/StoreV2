@@ -15,20 +15,28 @@ namespace Store.Reposatories.Repos
     {
         private readonly ApplicationDbContext _context;
         private readonly IDapperContext _dapperContext;
+        private readonly ILogger<ProductRepo> _logger;
 
-        public ProductRepo(ApplicationDbContext context, IDapperContext dapperContext)
+        public ProductRepo(ApplicationDbContext context, IDapperContext dapperContext, ILogger<ProductRepo> logger)
         {
             _context = context;
             _dapperContext = dapperContext ?? throw new ArgumentNullException(nameof(dapperContext));
+            _logger = logger;
         }
 
         #region IQueryable Methods (Entity Framework)
 
         public IQueryable<Product> GetAllProducts()
         {
-            return _context.Products.AsQueryable();
+            return _context.Products.AsQueryable().AsNoTracking();
         }
 
+        public IQueryable<Product> GetProductById(int id)
+        {
+            return _context.Products
+                .Where(p => p.ProductId == id)
+                .AsQueryable().AsNoTracking();
+        }
         public IQueryable<Product> GetProductsByType(string type)
         {
             return _context.Products
@@ -58,13 +66,21 @@ namespace Store.Reposatories.Repos
         #endregion
 
         #region Async Methods (Mix of EF Core and Dapper)
-
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<Dictionary<string, List<Product>>> GetProductsByPriceRangeAsync()
         {
-            using var connection = _dapperContext.CreateConnection();
-            return await connection.QueryAsync<Product>("SELECT * FROM product");
-        }
+            var under200 = _context.Products.Where(p => p.Price < 200).ToListAsync();
+            var under500 = _context.Products.Where(p => p.Price >= 200 && p.Price < 500).ToListAsync();
+            var over500 = _context.Products.Where(p => p.Price >= 500).ToListAsync();
 
+            await Task.WhenAll(under200, under500, over500);
+
+            return new Dictionary<string, List<Product>>
+            {
+                ["under-200"] = await under200,
+                ["under-500"] = await under500,
+                ["over-500"] = await over500
+            };
+        }
         public async Task<Product> GetProductByIdAsync(int id)
         {
             using var connection = _dapperContext.CreateConnection();
@@ -73,33 +89,6 @@ namespace Store.Reposatories.Repos
                 new { Id = id });
         }
 
-        public async Task<IEnumerable<Product>> GetProductsByTypeAsync(string type)
-        {
-            using var connection = _dapperContext.CreateConnection();
-            return await connection.QueryAsync<Product>(
-                "SELECT * FROM product WHERE type = @Type", 
-                new { Type = type });
-        }
-
-        public async Task<IEnumerable<Product>> GetProductsByBrandAsync(string brand)
-        {
-            using var connection = _dapperContext.CreateConnection();
-            return await connection.QueryAsync<Product>(
-                "SELECT * FROM product WHERE brand = @Brand", 
-                new { Brand = brand });
-        }
-
-        public async Task<IEnumerable<Product>> SearchProductsAsync(string searchTerm)
-        {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return await GetAllProductsAsync();
-
-            using var connection = _dapperContext.CreateConnection();
-            var term = $"%{searchTerm}%";
-            return await connection.QueryAsync<Product>(
-                "SELECT * FROM product WHERE name LIKE @Term OR brand LIKE @Term OR type LIKE @Term", 
-                new { Term = term });
-        }
 
         public async Task<Product> AddProductAsync(Product product)
         {
@@ -164,40 +153,6 @@ namespace Store.Reposatories.Repos
             using var connection = _dapperContext.CreateConnection();
             var result = await connection.ExecuteScalarAsync<decimal?>("SELECT MAX(price) FROM product");
             return result ?? 0;
-        }
-
-        public async Task<IEnumerable<string>> GetAllBrandsAsync()
-        {
-            using var connection = _dapperContext.CreateConnection();
-            return await connection.QueryAsync<string>("SELECT DISTINCT brand FROM product ORDER BY brand");
-        }
-
-        public async Task<IEnumerable<string>> GetAllTypesAsync()
-        {
-            using var connection = _dapperContext.CreateConnection();
-            return await connection.QueryAsync<string>("SELECT DISTINCT type FROM product ORDER BY type");
-        }
-
-        public async Task<Dictionary<string, IEnumerable<Product>>> GetProductsByPriceRangeAsync()
-        {
-            var result = new Dictionary<string, IEnumerable<Product>>();
-
-            // Filter products under $200
-            result["under-200"] = await _context.Products
-                .Where(p => p.Price < 200)
-                .ToListAsync();
-
-            // Filter products under $500 (but over $200)
-            result["under-500"] = await _context.Products
-                .Where(p => p.Price >= 200 && p.Price < 500)
-                .ToListAsync();
-
-            // Filter products over $500
-            result["over-500"] = await _context.Products
-                .Where(p => p.Price >= 500)
-                .ToListAsync();
-
-            return result;
         }
         #endregion
     }
