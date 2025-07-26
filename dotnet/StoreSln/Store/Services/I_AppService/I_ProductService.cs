@@ -15,7 +15,7 @@ namespace Store.Services.I_AppService
         //Task<IEnumerable<ProductDTO>> GetProductsByTypeAsync(string type);
         //Task<IEnumerable<ProductDTO>> GetProductsByBrandAsync(string brand);
         //Task<IEnumerable<ProductDTO>> SearchProductsAsync(string searchTerm);
-        //Task<Dictionary<string, List<ProductDTO>>> GetProductsByPriceRangeAsync();
+        Task<Dictionary<string, List<ProductDTO>>> GetProductsByPriceRangeAsync();
 
 
 

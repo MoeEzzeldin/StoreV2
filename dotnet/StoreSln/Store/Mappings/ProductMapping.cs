@@ -12,6 +12,8 @@ namespace Store.Mappings
         {
             CreateMap<Product, ProductDTO>();
             CreateMap<ProductDTO, Product>();
+            CreateMap<Product, ProductDTO>()
+    .       ForMember(dest => dest.Reviews, opt => opt.MapFrom(src => src.Reviews));
         }
     }
 }

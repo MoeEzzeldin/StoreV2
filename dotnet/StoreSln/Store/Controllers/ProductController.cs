@@ -81,16 +81,16 @@ namespace Store.Controllers
                 return NotFound();
             }
 
-            return Ok(product);
+             return Ok(product);
         }
 
-        //[HttpGet("/products/cards")]
-        //public async Task<ActionResult<Dictionary<string, IEnumerable<Product>>>> GetProductsByPriceRange()
-        //{
-        //    _logger.LogInformation("Getting products by price ranges");
-        //    var productsByPriceRange = await _productRepo.GetProductsByPriceRangeAsync();
-        //    return Ok(productsByPriceRange);
-        //}
+        [HttpGet("/product/cards")]
+        public async Task<ActionResult<Dictionary<string, IEnumerable<ProductDTO>>>> GetProductsByPriceRange()
+        {
+            _logger.LogInformation("Getting products by price ranges");
+            Dictionary<string, List<ProductDTO>> productsByPriceRange = await _productService.GetProductsByPriceRangeAsync();
+            return Ok(productsByPriceRange);
+        }
 
 
         //// GET: api/Product/type/electronics
@@ -102,7 +102,7 @@ namespace Store.Controllers
         //    return Ok(products);
         //}
 
-        
+
 
         //// GET: api/Product/brand/apple
         //[HttpGet("brand/{brand}")]

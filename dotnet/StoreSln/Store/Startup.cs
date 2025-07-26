@@ -43,12 +43,17 @@ namespace Store
                 throw; // Re-throw to ensure the application does not start if logging fails
             }
         }
-        
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // Add controllers and Razor Pages
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+                });
 
             // Configure CORS
             services.AddCors(options =>
@@ -61,7 +66,7 @@ namespace Store
                                .AllowAnyMethod();
                     });
             });
-            
+
             // Get connection string from configuration
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             if (string.IsNullOrEmpty(connectionString))
@@ -70,18 +75,18 @@ namespace Store
             }
             else
             {
-                Log.Information("Using connection string: {ConnectionString}", 
+                Log.Information("Using connection string: {ConnectionString}",
                     connectionString.Replace("Password=", "Password=***"));
             }
-                
+
             // Configure DbContext with SQL Server
-            services.AddDbContext<ApplicationDbContext>(options => 
+            services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString ?? "Server=localhost;Database=store;Trusted_Connection=True;TrustServerCertificate=True;"));
-            
+
             // Register DapperContext
             services.AddScoped<IDapperContext, DapperContext>();
 
-            // add AutoMapper
+            // add AutoMapperp
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             // Register repository services
@@ -99,13 +104,13 @@ namespace Store
                 Log.Warning("JWT Secret is null or empty! Using fallback key for development only.");
                 jwtSecret = "fallback-key-for-dev-only-do-not-use-in-production";
             }
-            
+
             var key = Encoding.ASCII.GetBytes(jwtSecret);
-            
+
             // Register security services
             services.AddScoped<IPasswordHasher, PasswordHasher>();
             services.AddScoped<ITokenGenerator>(sp => new JwtGenerator(jwtSecret));
-            
+
             // Configure authentication
             services.AddAuthentication(x =>
             {
@@ -124,7 +129,7 @@ namespace Store
                     ValidateAudience = false
                 };
             });
-            
+
             // Configure Serilog for dependency injection
             services.AddLogging(loggingBuilder =>
             {
@@ -132,7 +137,7 @@ namespace Store
                 loggingBuilder.AddSerilog(dispose: true);
             });
         }
-        
+
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -145,14 +150,14 @@ namespace Store
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
             }
-            
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            
+
             app.UseRouting();
-            
+
             app.UseCors();
-            
+
 
             // Add authentication middleware
             app.UseAuthentication();
@@ -162,9 +167,9 @@ namespace Store
             {
                 endpoints.MapControllers();
             });
-            
+
             // Log server start
-            Log.Information("Server started successfully at {Time}. Environment: {Environment}", 
+            Log.Information("Server started successfully at {Time}. Environment: {Environment}",
                 DateTime.UtcNow, env.EnvironmentName);
             Log.Information("Server is online and ready to accept requests");
         }

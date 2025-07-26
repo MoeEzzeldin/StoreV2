@@ -14,7 +14,7 @@ namespace Store.Reposatories.I_Repos
         //IQueryable<Product> GetProductsByType(string type);
         //IQueryable<Product> GetProductsByBrand(string brand);
         //IQueryable<Product> SearchProducts(string searchTerm);
-        //Task<Dictionary<string, List<Product>>> GetProductsByPriceRangeAsync();
+        Task<Dictionary<string, List<Product>>> GetProductsByPriceRangeAsync();
 
 
 

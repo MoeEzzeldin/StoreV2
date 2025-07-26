@@ -5,21 +5,12 @@ namespace Store.Models.DTOs
     public class ReviewDTO
     {
         public int ReviewId { get; set; }
-
         public int ProductId { get; set; }
-
-        public string Reviewer { get; set; } = null!;
-
+        public string Reviewer { get; set; } = string.Empty;
         public int Rating { get; set; }
-
-        public string Title { get; set; } = null!;
-
-        public string Comment { get; set; } = null!;
-
+        public string Title { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
         public DateTime Date { get; set; }
 
-        public virtual Product Product { get; set; } = null!;
-
-        public virtual ICollection<User> Users { get; set; } = new List<User>();
     }
 }

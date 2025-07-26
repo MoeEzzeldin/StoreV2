@@ -4,6 +4,7 @@ using Store.Models.Entities;
 using Store.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+using System.Collections.Generic;
 
 namespace Store.Services.AppService
 {
@@ -69,6 +70,28 @@ namespace Store.Services.AppService
                 throw;
             }
 
+        }
+
+        public async Task<Dictionary<string, List<ProductDTO>>> GetProductsByPriceRangeAsync()
+        {
+            try
+            {
+                Dictionary<string, List<Product>> productsByPriceRange = await _productRepo.GetProductsByPriceRangeAsync();
+                // Map the product entities to ProductDTOs
+                Dictionary<string, List<ProductDTO>> productsByPriceRangeDto = productsByPriceRange
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => _mapper.Map<List<ProductDTO>>(kvp.Value)
+                    );
+                _logger.LogInformation("Products retrieved by price range successfully");
+                return productsByPriceRangeDto;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving products by price range");
+                throw;
+            }
         }
     }
     #endregion
